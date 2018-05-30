@@ -67,12 +67,14 @@ export class BaseModel<
 	}
 
 	public setSelected(selected: boolean = true) {
-		this.selected = selected;
-		this.iterateListeners((listener, event) => {
-			if (listener.selectionChanged) {
-				listener.selectionChanged({ ...event, isSelected: selected });
-			}
-		});
+		if (this.selected !== selected) {
+			this.selected = selected;
+			this.iterateListeners((listener, event) => {
+				if (listener.selectionChanged) {
+					listener.selectionChanged({ ...event, isSelected: selected });
+				}
+			});
+		}
 	}
 
 	public remove() {
