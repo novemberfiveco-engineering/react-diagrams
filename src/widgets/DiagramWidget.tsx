@@ -27,6 +27,8 @@ export interface DiagramProps extends BaseWidgetProps {
 	maxNumberPointsPerLink?: number;
 	smartRouting?: boolean;
 
+	shouldSelectLinksOnMultiSelect?: boolean;
+
 	actionStartedFiring?: (action: BaseAction) => boolean;
 	actionStillFiring?: (action: BaseAction) => void;
 	actionStoppedFiring?: (action: BaseAction) => void;
@@ -55,7 +57,8 @@ export class DiagramWidget extends BaseWidget<DiagramProps, DiagramState> {
 		inverseZoom: false,
 		maxNumberPointsPerLink: Infinity, // backwards compatible default
 		smartRouting: false,
-		deleteKeys: [46, 8]
+		deleteKeys: [46, 8],
+		shouldSelectLinksOnMultiSelect: true
 	};
 
 	onKeyUpPointer: (this: Window, ev: KeyboardEvent) => void = null;
@@ -220,20 +223,21 @@ export class DiagramWidget extends BaseWidget<DiagramProps, DiagramState> {
 				}
 			});
 
-			_.forEach(diagramModel.getLinks(), link => {
-				var allSelected = true;
-				_.forEach(link.points, point => {
-					if ((this.state.action as SelectingAction).containsElement(point.x, point.y, diagramModel)) {
-						point.setSelected(true);
-					} else {
-						allSelected = false;
+			if (this.props.shouldSelectLinksOnMultiSelect) {
+				_.forEach(diagramModel.getLinks(), link => {
+					var allSelected = true;
+					_.forEach(link.points, point => {
+						if ((this.state.action as SelectingAction).containsElement(point.x, point.y, diagramModel)) {
+							point.setSelected(true);
+						} else {
+							allSelected = false;
+						}
+					});
+					if (allSelected) {
+						link.setSelected(true);
 					}
 				});
-
-				if (allSelected) {
-					link.setSelected(true);
-				}
-			});
+			}
 
 			this.state.action.mouseX2 = relative.x;
 			this.state.action.mouseY2 = relative.y;
